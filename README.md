@@ -5,8 +5,8 @@ for learning purposes only
 ## Features
 ### Grundlagen
 - [X] cmd
-- [ ] powershell
-- [ ] screenshot
+- [X] powershell
+- [X] screenshot
 - [ ] shutdown, restart
 - [ ] UAC bypass
 - [ ] builder with ui

