@@ -8,7 +8,7 @@ for learning purposes only
 - [X] powershell
 - [X] screenshot
 - [X] shutdown, restart
-- [X] UAC bypass
+- [X] (UAC bypass)
 - [ ] builder with ui
 ### erweitert
 - [ ] block input

