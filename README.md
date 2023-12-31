@@ -7,24 +7,24 @@ for learning purposes only
 - [X] cmd
 - [X] powershell
 - [X] screenshot
-- [ ] shutdown, restart
-- [ ] UAC bypass
+- [X] shutdown, restart
+- [X] UAC bypass
 - [ ] builder with ui
 ### erweitert
 - [ ] block input
 - [ ] block websites
-- [ ] block taskmanager
-- [ ] block debug programms
-- [ ] block wireshark
+- [X] block taskmanager
+- [X] block debug programms
+- [X] block wireshark
 - [ ] critical process
 - [ ] process list
 - [ ] stop process
-- [ ] blacklist process
+- [X] blacklist process
 - [ ] webcam photo
 - [ ] upload/download files
 - [ ] bsod (blue screen of death)
 - [ ] clear channel
-- [ ] check admin
+- [X] check admin
 - [ ] phishing
 - [ ] geo locate
 - [ ] self distroy

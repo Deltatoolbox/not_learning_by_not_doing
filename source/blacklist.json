@@ -1,0 +1,15 @@
+{
+    "blacklisted_programs": [
+        "eclipse.exe",
+        "Wireshark.exe",
+        "VMware.exe",
+        "VirtualBox.exe",
+        "Spybot.exe",
+        "Acronis.exe",
+        "GMER.exe",
+        "SpywareBlaster.exe",
+        "HitmanPro.exe",
+        "ToolbarTerminator.exe",
+        "Taskmgr.exe"
+    ]
+}
