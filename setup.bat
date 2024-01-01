@@ -8,5 +8,6 @@ pip install pycaw
 pip install scapy
 pip install wifi
 pip install requests
+pip install pynput
 REM start builder
 python builder.py

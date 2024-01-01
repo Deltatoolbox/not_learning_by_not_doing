@@ -1,0 +1,10 @@
+
+        Hier ist eine Beispiel-E-Mail-Adresse: example@email.com
+        Eine IBAN: CH9300762011623852957
+        Ein BSSID: 00:1A:2B:3C:4D:5E
+        Eine geheime Frage: What is your mother's maiden name?
+        Eine US-Führerscheinnummer: 5A3G8B1D4X6E7F9H2
+        Eine Schweizer Handynummer: +41791234567
+        Ein Kreditkarten-CVV-Code: 123
+        Eine Bitcoin-Wallet-Adresse: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+    

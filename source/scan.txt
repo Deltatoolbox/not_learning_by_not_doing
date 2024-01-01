@@ -1,0 +1,8 @@
+email: 1 times
+domain: 1 times
+iban: 1 times
+phone_number: 2 times
+bssid: 1 times
+password: 10 times
+ipv6_address: 4 times
+aircraft_registration: 12 times

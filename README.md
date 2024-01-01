@@ -36,10 +36,10 @@ for learning purposes only
 - [ ] Anti-Debug
 - [ ] help command
 ### keylogger
-- [ ] log every key
-- [ ] email erkennung
-- [ ] domain erkennung
-- [ ] keywords
+- [X] log every key
+- [X] email erkennung
+- [X] domain erkennung
+- [X] keywords
 ### beim starten
 - [X] ID zuweisen
 - [ ] in sicheren ordner kopieren.
