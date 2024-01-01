@@ -20,7 +20,7 @@ for learning purposes only
 - [ ] process list
 - [ ] stop process
 - [X] blacklist process
-- [ ] webcam photo
+- [x] webcam photo
 - [ ] upload/download files
 - [ ] bsod (blue screen of death)
 - [ ] clear channel
@@ -47,11 +47,11 @@ for learning purposes only
 - [ ] gewisse stealer ausloesen
 - [ ] autorun
 ### troll funktionen
-- [ ] Rickrolle
+- [X] Rickrolle
 - [ ] jumpscar
-- [ ] change volume
+- [X] change volume(Max/Min)
 - [ ] play mp3 file
-- [ ] show custom error message
+- [X] show custom error message
 - [ ] turn off monitors
 ### stealer
 - [ ] browser passwoerter
@@ -87,5 +87,5 @@ for learning purposes only
 - [ ] windwos key
 - [ ] autorun list
 - [ ] datei/ordner strucktur
-- [ ] HWID
-- [ ] IP config
+- [X] HWID
+- [X] IP info
