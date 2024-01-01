@@ -12,15 +12,12 @@ from interactions import Client, Intents, listen
 from interactions import ChannelType, File
 import os
 import threading
+import json
 #my imports
 from modules import basic_functions as functions
-#local settings
-ctx = SlashContext
 # Check if the file is in the final folder
 config = functions.read_config()
 functions.check_location(config["location"])
-# Create a ID on start 
-functions.create_or_read_id_file()
 print(functions.create_or_read_id_file())
 #discord set intents
 bot = Client(intents=Intents.DEFAULT)
@@ -36,27 +33,32 @@ print(f'is admin: {functions.IsAdmin()}')
 @listen()
 async def on_ready():
     category_name = functions.category_name()
-    #get guild id
-    guild = bot.get_guild(config["guild_id"])  
+    guild = bot.get_guild(config["guild_id"])
     channels = await guild.fetch_channels()
     existing_categories = [channel for channel in channels if channel.type == ChannelType.GUILD_CATEGORY]
-    # check if category exist, if generate it
+
     category = next((c for c in existing_categories if c.name == category_name), None)
     if not category:
         category = await guild.create_category(category_name)
-    else:
-    # check if channel exists, genereate missings
-        config_custom = functions.get_ids()
-        channel_ids = {"info_channel_id": "info", "main_channel_id": "main", "spam_channel_id": "spam"}
-        for channel_id_key, channel_name in channel_ids.items():
-            channel_id = config_custom.get(channel_id_key)
+
+    if not os.path.exists('config_custom.json'):
+        with open('config_custom.json', 'w') as config_file:
+            json.dump({"category_id": category.id, "info_channel_id": None, "main_channel_id": None, "spam_channel_id": None}, config_file)
+
+    config_custom = functions.get_ids()
+
+    channel_ids = {"info_channel_id": "info", "main_channel_id": "main", "spam_channel_id": "spam"}
+    for channel_id_key, channel_name in channel_ids.items():
+        channel_id = config_custom.get(channel_id_key)
+        if channel_id:  # Check if channel_id is not None or empty
             channel = guild.get_channel(channel_id)
-            if not channel or channel.parent_id != category.id:
-                # genearte channel.
-                channel = await category.create_text_channel(channel_name)
-                config_custom[channel_id_key] = channel.id
-            # save all ids to config.custom.json
-            functions.save_ids(config_custom["category_id"], config_custom["info_channel_id"], config_custom["main_channel_id"], config_custom["spam_channel_id"])
+        else:
+            channel = None
+        if not channel or (channel and channel.parent_id != category.id):
+            channel = await category.create_text_channel(channel_name)
+            config_custom[channel_id_key] = channel.id
+        functions.save_ids(config_custom["category_id"], config_custom["info_channel_id"], config_custom["main_channel_id"], config_custom["spam_channel_id"])
+
     
 #-----------------------------------------------------------------------------------------------------------------------------------
 # slash commands

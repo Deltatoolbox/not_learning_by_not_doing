@@ -18,16 +18,17 @@ import psutil
 import cv2
 #create or read device id
 def create_or_read_id_file():
-    id_file_path = "ids.txt"
-    if not os.path.exists(id_file_path):
-        with open(id_file_path, "w") as file:
-            random_id = random.randint(10000, 99999)
-            file.write(str(random_id))
-            return random_id
-    else:
-        with open(id_file_path, "r") as file:
-            return int(file.read())
-        
+    file_path = 'A:/Github/2/not_learning_by_not_doing/source/config_custom.json'
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r') as file:
+                config = json.load(file)
+                if 'device_id' in config:
+                    return config['device_id']
+        except json.JSONDecodeError:
+            pass
+    return random.randint(10000, 99999)
+
 #check if the file is in the final folder
 def check_location(folder):
     # location of file
